@@ -36,9 +36,11 @@ def load_cifar10_dataset(folder_path):
 
     return (train_images, train_labels), (test_images, test_labels)
 
+# Crear el directorio de salida si no existe
+output_dir = "decision_tree"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
-# Ruta de la carpeta donde se encuentra CIFAR-10
-# data_folder = "Data-Science-2025/cifar-10-batches-py"
 data_folder = "./cifar-10-batches-py"
 
 # Cargar los datos (una sola vez)
@@ -123,4 +125,9 @@ sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues',
 plt.xlabel('Predicción')
 plt.ylabel('Verdadero')
 plt.title('Matriz de Confusión')
-plt.show()
+# plt.show()
+
+base_name = f'Decision Tree.png'
+output_path = os.path.join(output_dir, base_name)
+plt.savefig(output_path)
+plt.close()
