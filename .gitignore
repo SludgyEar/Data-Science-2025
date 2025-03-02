@@ -1,3 +1,5 @@
-/cifar-10-batches-py
 *.md
+/cifar-10-batches-py
 /.idea
+/cancerDetection
+/camelyon-patch-py
