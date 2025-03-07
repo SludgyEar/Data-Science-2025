@@ -2,12 +2,12 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
-# from skimage.feature import graycomatrix, graycoprops
+from sklearn.decomposition import PCA
 from skimage.measure import shannon_entropy
 from scipy import stats
 from scipy import ndimage
 from skimage.transform import resize
-# import cv2
+
 from tqdm import tqdm  # Para mostrar progreso
 import h5py
 
@@ -25,7 +25,7 @@ def load_dataset(folder_path):  # Carga el dataset PCam desde los archivos h5
     with h5py.File(train_y_path, 'r') as h5f:
         train_labels = h5f['y'][:]  # Esto carga todas las etiquetas
 
-    # Limitar el tamaño para pruebas si es necesario (comenta esta línea para procesamiento completo)
+    # Para limitar el tamaño para pruebas, si lo comentas no tiene límite
     train_images, train_labels = train_images[:1000], train_labels[:1000]
 
     print(f"Datos cargados: {train_images.shape} imágenes, {train_labels.shape} etiquetas")
@@ -62,7 +62,7 @@ def calculate_features(gray_images):    # Se calculan los estadísticos
         'gradiente_y': np.zeros(n_samples),
         'energia': np.zeros(n_samples)
     }
-    print("Calculando características...")
+    print("Calculando características estadísticas...")
     for i in tqdm(range(n_samples)):
         img = gray_images[i]
 
@@ -100,7 +100,7 @@ def calculate_features(gray_images):    # Se calculan los estadísticos
 
 
 def plot_features(features, output_dir):    # Grafica histogramas
-
+    print("Creando gráficas...")
     # Crear un directorio para las gráficas si no existe
     plots_dir = os.path.join(output_dir, "plots")
     if not os.path.exists(plots_dir):
@@ -159,22 +159,18 @@ def create_feature_matrix(images, features):
     return feature_values
 
 
-# En caso de que no exista, se crea un directorio para guadar la salida
+# Confirma la existencia de un directorio de salida
 output_dir = "cancerDetection"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 
-# Modificación de la función principal para incluir más visualizaciones
 def visualize_and_save_data(X_resized, X_vectorized, feature_matrix, features, y_train, output_dir):
-    """
-    Visualiza y guarda diferentes aspectos de los datos procesados
-    """
     vis_dir = os.path.join(output_dir, "visualizaciones")
     if not os.path.exists(vis_dir):
         os.makedirs(vis_dir)
 
-    # 1. Visualizar las imágenes de ejemplo
+    # Visualizar las imágenes de ejemplo
     plt.figure(figsize=(15, 8))
     for i in range(10):  # Aumentamos a 10 ejemplos
         plt.subplot(2, 5, i + 1)
@@ -185,7 +181,7 @@ def visualize_and_save_data(X_resized, X_vectorized, feature_matrix, features, y
     plt.savefig(os.path.join(vis_dir, "ejemplos_imagenes.png"))
     plt.close()
 
-    # 2. Visualizar la matriz de características como una imagen
+    # Visualizar la matriz de características como una imagen
     plt.figure(figsize=(12, 10))
     plt.imshow(feature_matrix[:100], aspect='auto', cmap='viridis')
     plt.colorbar(label='Valor de la característica')
@@ -196,7 +192,7 @@ def visualize_and_save_data(X_resized, X_vectorized, feature_matrix, features, y
     plt.savefig(os.path.join(vis_dir, "feature_matrix_visualization.png"))
     plt.close()
 
-    # 3. Visualizar algunos vectores de imágenes
+    # Visualizar algunos vectores de imágenes
     plt.figure(figsize=(15, 8))
     for i in range(5):
         plt.subplot(1, 5, i + 1)
@@ -209,7 +205,7 @@ def visualize_and_save_data(X_resized, X_vectorized, feature_matrix, features, y
     plt.savefig(os.path.join(vis_dir, "vectores_como_imagenes.png"))
     plt.close()
 
-    # 4. Visualizar correlaciones entre características
+    # Visualizar correlaciones entre características
     feature_names = list(features.keys())
     feature_values = np.column_stack([features[feature] for feature in features])
 
@@ -219,7 +215,7 @@ def visualize_and_save_data(X_resized, X_vectorized, feature_matrix, features, y
     plt.colorbar(label='Coeficiente de correlación')
     plt.title('Matriz de correlación entre características')
 
-    # Añadir etiquetas
+    # Etiquetado
     tick_marks = np.arange(len(feature_names))
     plt.xticks(tick_marks, feature_names, rotation=45)
     plt.yticks(tick_marks, feature_names)
@@ -234,7 +230,7 @@ def visualize_and_save_data(X_resized, X_vectorized, feature_matrix, features, y
     plt.savefig(os.path.join(vis_dir, "correlation_matrix.png"))
     plt.close()
 
-    # 5. Visualizar distribución de características por clase
+    # Visualizar distribución de características por clase
     plt.figure(figsize=(20, 15))
     for i, feature_name in enumerate(feature_names):
         plt.subplot(3, 3, i + 1)
@@ -255,8 +251,8 @@ def visualize_and_save_data(X_resized, X_vectorized, feature_matrix, features, y
     plt.savefig(os.path.join(vis_dir, "distribucion_por_clase.png"))
     plt.close()
 
-    # 6. Visualizar datos en 3D usando PCA para reducir dimensionalidad
-    from sklearn.decomposition import PCA
+    # Visualiza los datos en 3D usando PCA para reducir dimensionalidad
+
 
     # Reducir dimensionalidad a 3 componentes
     pca = PCA(n_components=3)
@@ -289,19 +285,15 @@ def visualize_and_save_data(X_resized, X_vectorized, feature_matrix, features, y
     print(f"Todas las visualizaciones han sido guardadas en: {vis_dir}")
 
 
-# Modificación del bloque final en la función main()
-# Reemplaza el código que mencionaste con esto:
 def main():
     data_folder = "./camelyon-patch-py"  # Ajusta esta ruta a donde tengas los archivos h5
 
     # Cargamos los datos
     X_train, y_train = load_dataset(data_folder)
 
-    # Mostramos las formas de los datos
     print("Forma de X_train: ", X_train.shape)
     print("Forma de y_train: ", y_train.shape)
 
-    # Procesar los datos:
     # 1. Convertir a escala de grises
     X_gray = convert_to_grayscale(X_train)
     print("Forma después de convertir a escala de grises:", X_gray.shape)
