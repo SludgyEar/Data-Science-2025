@@ -7,6 +7,7 @@ from skimage.measure import shannon_entropy
 from scipy import stats
 from scipy import ndimage
 from skimage.transform import resize
+import cancerDetection as model
 
 from tqdm import tqdm  # Para mostrar progreso
 import h5py
@@ -25,7 +26,7 @@ def load_dataset(folder_path):  # Carga el dataset PCam desde los archivos h5
     with h5py.File(train_y_path, 'r') as h5f:
         train_labels = h5f['y'][:]  # Esto carga todas las etiquetas
 
-    # Para limitar el tamaño para pruebas, si lo comentas no tiene límite
+    # Limita el tamaño de muestra, si se comenta trabajará con todo el dataset
     train_images, train_labels = train_images[:1000], train_labels[:1000]
 
     print(f"Datos cargados: {train_images.shape} imágenes, {train_labels.shape} etiquetas")
@@ -330,3 +331,5 @@ def main():
 
 if __name__ == "__main__":
     X_vectorized, feature_matrix, y_train = main()
+    print("Empezando con el modelo...")
+    modelo, accuracy = model.main_with_model()
